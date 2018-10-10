@@ -43,6 +43,7 @@ def get_args():
     parser.add_argument('--learning_decay', type=float, default=0.001)
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--batch_size', type=int, default=512)
+    parser.add_argument('--num_epochs', type=int, default=None)
     opts = parser.parse_args()
 
     opts.data_dir = get_data_path(dataset_name = '*/*',
@@ -89,7 +90,7 @@ def main(opts):
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
                          x={'input': data.train.images},
                          y=tf.keras.utils.to_categorical(data.train.labels.astype(np.int32), 10).astype(np.float32),
-                         num_epochs=None,
+                         num_epochs=opts.num_epochs,
                          batch_size=opts.batch_size,
                          shuffle=True,
                          queue_capacity=10*opts.batch_size,
