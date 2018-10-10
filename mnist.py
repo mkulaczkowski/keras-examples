@@ -43,7 +43,7 @@ def get_args():
     parser.add_argument('--learning_decay', type=float, default=0.001)
     parser.add_argument('--dropout', type=float, default=0.5)
     parser.add_argument('--batch_size', type=int, default=512)
-    parser.add_argument('--num_steps', type=int, default=None)
+    parser.add_argument('--num_steps', type=int, default=9999999)
     opts = parser.parse_args()
 
     opts.data_dir = get_data_path(dataset_name = '*/*',
@@ -104,9 +104,9 @@ def main(opts):
                          num_threads=4)
 
     train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn,
-                                        max_steps=1e6)
+                                        max_steps=opts.num_steps)
     eval_spec = tf.estimator.EvalSpec(input_fn=eval_input_fn,
-                                      steps=opts.num_steps,
+                                      steps=None,
                                       start_delay_secs=0,
                                       throttle_secs=60)
 
