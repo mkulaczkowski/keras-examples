@@ -42,8 +42,10 @@ def get_args():
     parser.add_argument('--learning_rate', type=float, default=0.001)
     parser.add_argument('--learning_decay', type=float, default=0.001)
     parser.add_argument('--dropout', type=float, default=0.5)
+    # Runtime params
     parser.add_argument('--batch_size', type=int, default=512)
     parser.add_argument('--num_steps', type=int, default=9999999)
+    parser.add_argument('--input_threads', type=int, default=None)
     opts = parser.parse_args()
 
     opts.data_dir = get_data_path(dataset_name = '*/*',
@@ -51,6 +53,10 @@ def get_args():
                                  local_repo = '',
                                  path = '')
     opts.log_dir = get_logs_path(root = opts.local_log_dir)
+
+    if opts.input_threads is None:
+        import multiprocessing
+        opts.input_threads = multiprocessing.cpu_count()
 
     return opts
 
@@ -94,14 +100,14 @@ def main(opts):
                          batch_size=opts.batch_size,
                          shuffle=True,
                          queue_capacity=10*opts.batch_size,
-                         num_threads=4)
+                         num_threads=opts.input_threads)
     eval_input_fn = tf.estimator.inputs.numpy_input_fn(
                          x={'input': data.test.images},
                          y=tf.keras.utils.to_categorical(data.test.labels.astype(np.int32), 10).astype(np.float32),
                          num_epochs=1,
                          shuffle=False,
                          queue_capacity=10*opts.batch_size,
-                         num_threads=4)
+                         num_threads=opts.input_threads)
 
     train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn,
                                         max_steps=opts.num_steps)
